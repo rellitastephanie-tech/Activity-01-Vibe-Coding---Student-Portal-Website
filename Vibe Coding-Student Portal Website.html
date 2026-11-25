@@ -1,0 +1,2172 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexus University — Student Portal</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans antialiased transition-colors duration-200 selection:bg-brand-500 selection:text-white overflow-x-hidden">
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Mobile Sidebar Backdrop -->
+  <div id="mobile-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-30 hidden lg:hidden transition-opacity"></div>
+
+  <!-- App Shell -->
+  <div class="min-h-screen flex">
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="fixed lg:sticky top-0 left-0 z-40 h-screen w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out">
+      <div>
+        <!-- University Brand Header -->
+        <div class="h-16 px-5 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-600 to-indigo-700 flex items-center justify-center text-white shadow-sm">
+              <i class="ph-bold ph-graduation-cap text-xl"></i>
+            </div>
+            <div>
+              <span class="font-bold text-base tracking-tight block leading-none">Nexus<span class="text-brand-600 dark:text-brand-400">Portal</span></span>
+              <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">University OS</span>
+            </div>
+          </div>
+          <button onclick="toggleSidebar(false)" class="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Close sidebar">
+            <i class="ph ph-x text-lg"></i>
+          </button>
+        </div>
+
+        <!-- Term Pill -->
+        <div class="px-4 pt-4 pb-2">
+          <div class="px-3 py-2 rounded-xl bg-slate-100/80 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700/70 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">Fall 2026 Term</span>
+            </div>
+            <span class="text-[11px] font-mono text-slate-500 dark:text-slate-400">Wk 13/16</span>
+          </div>
+        </div>
+
+        <!-- Nav Links -->
+        <nav class="px-3 py-2 space-y-1" id="main-nav">
+          <button onclick="navigateTo('dashboard')" data-nav="dashboard" class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all">
+            <span class="flex items-center gap-3">
+              <i class="ph ph-squares-four text-lg"></i>
+              Dashboard
+            </span>
+          </button>
+
+          <button onclick="navigateTo('schedule')" data-nav="schedule" class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all">
+            <span class="flex items-center gap-3">
+              <i class="ph ph-calendar-blank text-lg"></i>
+              Class Schedule
+            </span>
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">5</span>
+          </button>
+
+          <button onclick="navigateTo('grades')" data-nav="grades" class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all">
+            <span class="flex items-center gap-3">
+              <i class="ph ph-exam text-lg"></i>
+              Grades & GPA
+            </span>
+          </button>
+
+          <button onclick="navigateTo('announcements')" data-nav="announcements" class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all">
+            <span class="flex items-center gap-3">
+              <i class="ph ph-megaphone text-lg"></i>
+              Announcements
+            </span>
+            <span id="nav-unread-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-brand-600 text-white">3</span>
+          </button>
+
+          <button onclick="navigateTo('profile')" data-nav="profile" class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all">
+            <span class="flex items-center gap-3">
+              <i class="ph ph-identification-card text-lg"></i>
+              Student Profile
+            </span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Bottom Sidebar Card -->
+      <div class="p-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+        <div class="p-3 rounded-xl bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800/80 dark:to-slate-900 border border-slate-200 dark:border-slate-800">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Degree Progress</span>
+            <span class="text-xs font-mono font-bold text-brand-600 dark:text-brand-400">78%</span>
+          </div>
+          <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+            <div class="h-full bg-brand-600 dark:bg-brand-500 rounded-full" style="width: 78%"></div>
+          </div>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">94 of 120 credits completed</p>
+        </div>
+
+        <button onclick="resetDemoData()" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i class="ph ph-arrow-counter-clockwise"></i>
+          Reset Demo Storage
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col min-w-0">
+
+      <!-- Top Header -->
+      <header class="sticky top-0 z-20 h-16 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3 flex-1 max-w-md">
+          <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Open menu">
+            <i class="ph ph-list text-xl"></i>
+          </button>
+
+          <!-- Global Quick Search -->
+          <div class="relative w-full">
+            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base"></i>
+            <input
+              id="global-search-input"
+              type="text"
+              placeholder="Search courses, announcements, tasks..."
+              oninput="handleGlobalSearch(this.value)"
+              class="w-full pl-9 pr-4 py-2 text-sm rounded-xl bg-slate-100/80 dark:bg-slate-800/80 border border-transparent focus:border-brand-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all placeholder:text-slate-400"
+            />
+            <!-- Quick Search Dropdown -->
+            <div id="global-search-results" class="hidden absolute left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-2 z-50 max-h-80 overflow-y-auto"></div>
+          </div>
+        </div>
+
+        <!-- Right Header Actions -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Theme Toggle -->
+          <button onclick="toggleTheme()" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-800 transition-colors" title="Toggle Dark/Light Theme" aria-label="Toggle Theme">
+            <i id="theme-icon" class="ph ph-moon text-lg"></i>
+          </button>
+
+          <!-- Notification Bell -->
+          <div class="relative">
+            <button onclick="toggleNotifications()" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-800 transition-colors relative" aria-label="Notifications">
+              <i class="ph ph-bell text-lg"></i>
+              <span id="header-notif-dot" class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900"></span>
+            </button>
+
+            <!-- Notification Popover -->
+            <div id="notif-popover" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 z-50 overflow-hidden">
+              <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <span class="font-semibold text-sm">Notifications</span>
+                <button onclick="markAllAnnouncementsRead()" class="text-xs font-medium text-brand-600 dark:text-brand-400 hover:underline">Mark all read</button>
+              </div>
+              <div id="notif-popover-list" class="divide-y divide-slate-100 dark:divide-slate-800 max-h-72 overflow-y-auto"></div>
+              <div class="p-2.5 bg-slate-50 dark:bg-slate-800/50 text-center border-t border-slate-200 dark:border-slate-800">
+                <button onclick="navigateTo('announcements'); toggleNotifications(false);" class="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline">View all announcements &rarr;</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Profile Preview -->
+          <button onclick="navigateTo('profile')" class="flex items-center gap-2.5 pl-1.5 pr-3 py-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all">
+            <img id="header-avatar" src="https://api.dicebear.com/9.x/notionists/svg?seed=AlexRivera&backgroundColor=e0e7ff" alt="Alex Rivera" class="w-8 h-8 rounded-lg object-cover bg-brand-100" />
+            <div class="hidden md:block text-left">
+              <p id="header-student-name" class="text-xs font-semibold leading-tight">Alex Rivera</p>
+              <p class="text-[11px] font-mono text-slate-500 dark:text-slate-400">CS • Senior</p>
+            </div>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main View Container -->
+      <main class="flex-1 px-4 sm:px-6 lg:px-8 py-6 max-w-7xl w-full mx-auto">
+
+        <!-- =========================================================
+             VIEW 1: DASHBOARD
+        ========================================================== -->
+        <section id="view-dashboard" class="view-section space-y-6">
+          <!-- Welcome Banner -->
+          <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand-600 via-indigo-600 to-violet-700 text-white p-6 sm:p-8 shadow-sm">
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-xs text-xs font-medium mb-3">
+                  <i class="ph ph-calendar-check"></i>
+                  <span id="welcome-date-display">Wednesday, November 25, 2026 • Fall Semester</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Welcome back, <span id="welcome-first-name">Alex</span>!</h1>
+                <p class="text-indigo-100 text-sm sm:text-base mt-1 max-w-xl">
+                  You have <span id="welcome-classes-count" class="font-semibold text-white">3 classes</span> scheduled today and <span id="welcome-tasks-count" class="font-semibold text-white">3 pending tasks</span> due this week.
+                </p>
+              </div>
+              <div class="flex flex-wrap gap-2.5">
+                <button onclick="navigateTo('schedule')" class="px-4 py-2.5 rounded-xl bg-white text-brand-700 font-semibold text-sm hover:bg-indigo-50 transition-colors shadow-xs flex items-center gap-2">
+                  <i class="ph-bold ph-calendar"></i>
+                  View Timetable
+                </button>
+                <button onclick="navigateTo('grades')" class="px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-sm backdrop-blur-xs transition-colors flex items-center gap-2">
+                  <i class="ph-bold ph-chart-line-up"></i>
+                  GPA Simulator
+                </button>
+              </div>
+            </div>
+            <!-- Decorative background circles -->
+            <div class="absolute -right-12 -top-12 w-56 h-56 rounded-full bg-white/10 blur-xl pointer-events-none"></div>
+            <div class="absolute right-24 -bottom-16 w-44 h-44 rounded-full bg-indigo-400/20 blur-lg pointer-events-none"></div>
+          </div>
+
+          <!-- Quick Stats Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-2xs">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Cumulative GPA</span>
+                <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center">
+                  <i class="ph-bold ph-trophy text-lg"></i>
+                </div>
+              </div>
+              <div class="mt-3 flex items-baseline gap-2">
+                <span id="stat-cum-gpa" class="text-2xl font-bold font-mono">3.86</span>
+                <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full">+0.04</span>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Dean's Honors List Standing</p>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-2xs">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Credits Earned</span>
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                  <i class="ph-bold ph-books text-lg"></i>
+                </div>
+              </div>
+              <div class="mt-3 flex items-baseline gap-2">
+                <span class="text-2xl font-bold font-mono">94</span>
+                <span class="text-xs font-medium text-slate-500 dark:text-slate-400">/ 120 req.</span>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">+16 credits in progress this term</p>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-2xs">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Attendance Rate</span>
+                <div class="w-9 h-9 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+                  <i class="ph-bold ph-user-check text-lg"></i>
+                </div>
+              </div>
+              <div class="mt-3 flex items-baseline gap-2">
+                <span class="text-2xl font-bold font-mono">96.4%</span>
+                <span class="text-xs font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/60 px-2 py-0.5 rounded-full">Excellent</span>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">54 of 56 lectures attended</p>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-2xs">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pending Tasks</span>
+                <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                  <i class="ph-bold ph-check-square-offset text-lg"></i>
+                </div>
+              </div>
+              <div class="mt-3 flex items-baseline gap-2">
+                <span id="stat-pending-tasks" class="text-2xl font-bold font-mono">3</span>
+                <span class="text-xs font-medium text-amber-600 dark:text-amber-400">2 due soon</span>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Synced with local workspace</p>
+            </div>
+          </div>
+
+          <!-- Dashboard Middle Grid: Today's Classes + Upcoming Deadlines -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Today's Classes Timeline (5 cols) -->
+            <div class="lg:col-span-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 flex flex-col justify-between shadow-2xs">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 class="text-base font-bold">Today's Classes</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Wednesday Schedule</p>
+                  </div>
+                  <button onclick="navigateTo('schedule')" class="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline">Full Week &rarr;</button>
+                </div>
+
+                <div id="dashboard-today-classes" class="space-y-3">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+
+              <div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                <span>Campus Wi-Fi: <strong class="text-emerald-600 dark:text-emerald-400">Nexus-Secure (5G)</strong></span>
+                <span>Library: Open until 11 PM</span>
+              </div>
+            </div>
+
+            <!-- Interactive Upcoming Deadlines / To-Do List (7 cols) -->
+            <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-2xs flex flex-col">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div>
+                  <h2 class="text-base font-bold">Upcoming Deadlines & Tasks</h2>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">Check off items or add personal study tasks (saved automatically)</p>
+                </div>
+                <!-- Filter Pills -->
+                <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl self-start">
+                  <button onclick="setTaskFilter('all')" data-task-filter="all" class="task-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold transition-all">All</button>
+                  <button onclick="setTaskFilter('pending')" data-task-filter="pending" class="task-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold transition-all">Pending</button>
+                  <button onclick="setTaskFilter('completed')" data-task-filter="completed" class="task-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold transition-all">Done</button>
+                </div>
+              </div>
+
+              <!-- Quick Add Task Form -->
+              <form onsubmit="addNewTask(event)" class="flex flex-col sm:flex-row gap-2 mb-4">
+                <input
+                  id="new-task-title"
+                  type="text"
+                  required
+                  placeholder="Add an assignment or personal task..."
+                  class="flex-1 px-3.5 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:border-brand-500 focus:outline-none"
+                />
+                <div class="flex gap-2">
+                  <select id="new-task-course" class="px-3 py-2 text-xs font-medium rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:border-brand-500 focus:outline-none">
+                    <option value="CS 401">CS 401</option>
+                    <option value="CS 340">CS 340</option>
+                    <option value="MATH 310">MATH 310</option>
+                    <option value="STAT 302">STAT 302</option>
+                    <option value="PHIL 210">PHIL 210</option>
+                    <option value="Personal">Personal</option>
+                  </select>
+                  <input id="new-task-due" type="date" value="2026-11-30" class="px-3 py-2 text-xs font-medium rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:border-brand-500 focus:outline-none" />
+                  <button type="submit" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold transition-colors flex items-center gap-1.5 shrink-0">
+                    <i class="ph-bold ph-plus"></i>
+                    Add
+                  </button>
+                </div>
+              </form>
+
+              <!-- Tasks List -->
+              <div id="dashboard-tasks-list" class="space-y-2 flex-1 max-h-72 overflow-y-auto pr-1">
+                <!-- Populated via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Dashboard Bottom Grid: GPA Trend Chart + Recent Announcements -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Mini GPA Trend Chart (5 cols) -->
+            <div class="lg:col-span-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-2xs">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h2 class="text-base font-bold">GPA Trajectory</h2>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">Semester-by-semester progression</p>
+                </div>
+                <span class="text-xs font-mono font-semibold px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 text-brand-600 dark:text-brand-400">Peak: 3.92</span>
+              </div>
+              <!-- Clean SVG Chart -->
+              <div id="gpa-chart-container" class="w-full pt-2"></div>
+            </div>
+
+            <!-- Recent Announcements Preview (7 cols) -->
+            <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-2xs">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h2 class="text-base font-bold">Recent Announcements</h2>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">Latest university notices & department alerts</p>
+                </div>
+                <button onclick="navigateTo('announcements')" class="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline">All Notices &rarr;</button>
+              </div>
+              <div id="dashboard-announcements-preview" class="space-y-3">
+                <!-- Populated via JS -->
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- =========================================================
+             VIEW 2: CLASS SCHEDULE
+        ========================================================== -->
+        <section id="view-schedule" class="view-section hidden space-y-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 class="text-2xl font-bold tracking-tight">Class Schedule</h1>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Fall 2026 Enrolled Courses (16.0 Credits) • Click any class for syllabus & office hours</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2.5">
+              <!-- Day Filter -->
+              <select id="schedule-day-filter" onchange="renderSchedule()" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-brand-500 focus:outline-none">
+                <option value="ALL">All Days (Mon–Fri)</option>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+              </select>
+
+              <!-- Course Filter -->
+              <select id="schedule-course-filter" onchange="renderSchedule()" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-brand-500 focus:outline-none">
+                <option value="ALL">All Courses</option>
+              </select>
+
+              <!-- View Switcher -->
+              <div class="inline-flex rounded-xl bg-slate-200/70 dark:bg-slate-800 p-1">
+                <button onclick="setScheduleViewMode('grid')" id="btn-sched-grid" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all">
+                  <i class="ph-bold ph-grid-four"></i>
+                  Weekly Grid
+                </button>
+                <button onclick="setScheduleViewMode('list')" id="btn-sched-list" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all">
+                  <i class="ph-bold ph-list-dashes"></i>
+                  List View
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Course Legend Pills -->
+          <div id="schedule-legend" class="flex flex-wrap gap-2"></div>
+
+          <!-- Weekly Grid Container -->
+          <div id="schedule-grid-container" class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-x-auto shadow-2xs">
+            <!-- Populated via JS -->
+          </div>
+
+          <!-- List View Container -->
+          <div id="schedule-list-container" class="hidden space-y-4">
+            <!-- Populated via JS -->
+          </div>
+        </section>
+
+        <!-- =========================================================
+             VIEW 3: GRADES & GPA SIMULATOR
+        ========================================================== -->
+        <section id="view-grades" class="view-section hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 class="text-2xl font-bold tracking-tight">Grades & Academic Record</h1>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Official coursework breakdown and interactive "What-If" GPA simulator</p>
+            </div>
+
+            <!-- Semester Selector -->
+            <div class="flex items-center gap-2">
+              <label for="grades-semester-select" class="text-xs font-semibold text-slate-500 dark:text-slate-400">Term:</label>
+              <select id="grades-semester-select" onchange="renderGrades()" class="px-4 py-2 text-sm font-semibold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-brand-500 focus:outline-none">
+                <option value="Fall 2026">Fall 2026 (Current)</option>
+                <option value="Spring 2026">Spring 2026</option>
+                <option value="Fall 2025">Fall 2025</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Summary Metrics Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-2xs">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Selected Term GPA</span>
+              <div class="mt-2 flex items-baseline gap-2">
+                <span id="grades-term-gpa" class="text-3xl font-bold font-mono text-brand-600 dark:text-brand-400">3.90</span>
+                <span id="grades-sim-indicator" class="hidden text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">Simulated</span>
+              </div>
+              <p id="grades-term-credits-label" class="text-xs text-slate-500 dark:text-slate-400 mt-1">16.0 Attempted Credits</p>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-2xs">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Cumulative GPA</span>
+              <div class="mt-2 flex items-baseline gap-2">
+                <span id="grades-cum-gpa" class="text-3xl font-bold font-mono">3.86</span>
+                <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">4.00 Scale</span>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Magna Cum Laude Track</p>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-2xs">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Earned Credits</span>
+              <div class="mt-2 flex items-baseline gap-2">
+                <span class="text-3xl font-bold font-mono">94.0</span>
+                <span class="text-xs font-medium text-slate-500 dark:text-slate-400">(+16.0 Active)</span>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">0 Failed or Withdrawn Courses</p>
+            </div>
+          </div>
+
+          <!-- Interactive What-If GPA Simulator Banner -->
+          <div class="bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-800/60 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-3">
+              <div class="w-9 h-9 rounded-xl bg-brand-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                <i class="ph-bold ph-sliders"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-900 dark:text-white">"What-If" Final Grade Simulator</h3>
+                <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                  Adjust target letter grades in the dropdowns below to test how final exams will impact your Term and Cumulative GPA.
+                </p>
+              </div>
+            </div>
+            <button onclick="resetSimulatedGrades()" class="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shrink-0 self-start sm:self-center">
+              Reset Simulator
+            </button>
+          </div>
+
+          <!-- Grades Table Card -->
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <th class="py-3.5 px-4">Course</th>
+                    <th class="py-3.5 px-4 text-center">Credits</th>
+                    <th class="py-3.5 px-4 text-center">Midterm</th>
+                    <th class="py-3.5 px-4 text-center">Assignments</th>
+                    <th class="py-3.5 px-4 text-center">Current Score</th>
+                    <th class="py-3.5 px-4 text-center">Grade / What-If</th>
+                    <th class="py-3.5 px-4 text-right">Details</th>
+                  </tr>
+                </thead>
+                <tbody id="grades-table-body" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             VIEW 4: ANNOUNCEMENTS
+        ========================================================== -->
+        <section id="view-announcements" class="view-section hidden space-y-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 class="text-2xl font-bold tracking-tight">Campus Announcements</h1>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Official notices, academic deadlines, and student life updates</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button onclick="markAllAnnouncementsRead()" class="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5">
+                <i class="ph-bold ph-checks"></i>
+                Mark All Read
+              </button>
+            </div>
+          </div>
+
+          <!-- Filter & Search Bar -->
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-2xs">
+            <!-- Category Pills -->
+            <div class="flex flex-wrap gap-1.5" id="announcement-category-filters">
+              <button onclick="setAnnouncementCategory('All')" data-ann-cat="All" class="ann-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold transition-all">All</button>
+              <button onclick="setAnnouncementCategory('Academic')" data-ann-cat="Academic" class="ann-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold transition-all">Academic</button>
+              <button onclick="setAnnouncementCategory('Campus Events')" data-ann-cat="Campus Events" class="ann-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold transition-all">Campus Events</button>
+              <button onclick="setAnnouncementCategory('Financial/Admin')" data-ann-cat="Financial/Admin" class="ann-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold transition-all">Financial/Admin</button>
+              <button onclick="setAnnouncementCategory('Urgent')" data-ann-cat="Urgent" class="ann-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold transition-all">Urgent</button>
+              <button onclick="setAnnouncementCategory('Bookmarked')" data-ann-cat="Bookmarked" class="ann-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1">
+                <i class="ph-fill ph-bookmark-simple text-amber-500"></i>
+                Pinned
+              </button>
+            </div>
+
+            <!-- Keyword Search -->
+            <div class="relative w-full lg:w-72">
+              <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <input
+                id="announcement-search"
+                type="text"
+                oninput="renderAnnouncements()"
+                placeholder="Filter announcements..."
+                class="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-brand-500 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <!-- Announcements Feed -->
+          <div id="announcements-feed" class="space-y-4">
+            <!-- Populated via JS -->
+          </div>
+        </section>
+
+        <!-- =========================================================
+             VIEW 5: STUDENT PROFILE
+        ========================================================== -->
+        <section id="view-profile" class="view-section hidden space-y-6">
+          <div>
+            <h1 class="text-2xl font-bold tracking-tight">Student Profile & Digital ID</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Manage your contact details, academic bio, and official university credentials</p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Left Column: Digital Student ID Card + Advisor Card (5 cols) -->
+            <div class="lg:col-span-5 space-y-6">
+
+              <!-- Digital Student ID Card -->
+              <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-6 shadow-lg border border-indigo-500/30">
+                <!-- Subtle grid overlay -->
+                <div class="flex items-center justify-between pb-4 border-b border-white/10">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
+                      <i class="ph-bold ph-graduation-cap text-white text-lg"></i>
+                    </div>
+                    <div>
+                      <p class="text-xs font-bold tracking-wider uppercase">Nexus University</p>
+                      <p class="text-[10px] text-indigo-300">Official Student Credential</p>
+                    </div>
+                  </div>
+                  <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                    Active • Full-Time
+                  </span>
+                </div>
+
+                <!-- Student Photo & Core Info -->
+                <div class="py-5 flex items-center gap-4">
+                  <img id="id-card-avatar" src="https://api.dicebear.com/9.x/notionists/svg?seed=AlexRivera&backgroundColor=e0e7ff" alt="Student Avatar" class="w-20 h-20 rounded-2xl bg-indigo-100 object-cover border-2 border-indigo-400/50 shrink-0" />
+                  <div class="min-w-0">
+                    <h2 id="id-card-name" class="text-xl font-bold truncate">Alex Rivera</h2>
+                    <p class="text-xs text-indigo-200 font-medium mt-0.5">B.S. in Computer Science</p>
+                    <p class="text-[11px] text-slate-300 mt-0.5">Minor: Applied Mathematics</p>
+                    <div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-white/10 font-mono text-xs text-indigo-200">
+                      <span>ID:</span>
+                      <strong class="text-white">NXU-2023-8841</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Academic Standing & Grad Info -->
+                <div class="grid grid-cols-2 gap-3 py-3 px-3.5 rounded-2xl bg-white/5 border border-white/10 text-xs">
+                  <div>
+                    <span class="text-[10px] uppercase tracking-wider text-slate-400 block">Academic Standing</span>
+                    <span class="font-semibold text-emerald-300">Good Standing (Honors)</span>
+                  </div>
+                  <div>
+                    <span class="text-[10px] uppercase tracking-wider text-slate-400 block">Expected Graduation</span>
+                    <span class="font-semibold text-white">May 2027</span>
+                  </div>
+                </div>
+
+                <!-- Barcode / QR Visual Footer -->
+                <div class="mt-5 pt-4 border-t border-white/10 flex items-center justify-between gap-4">
+                  <div class="flex-1">
+                    <!-- Simulated SVG Barcode -->
+                    <svg class="w-full h-9 text-white/90" viewBox="0 0 220 36" fill="currentColor" aria-label="Student ID Barcode">
+                      <rect x="0" y="0" width="3" height="36"/><rect x="5" y="0" width="1" height="36"/><rect x="9" y="0" width="4" height="36"/>
+                      <rect x="16" y="0" width="2" height="36"/><rect x="21" y="0" width="1" height="36"/><rect x="25" y="0" width="5" height="36"/>
+                      <rect x="33" y="0" width="2" height="36"/><rect x="38" y="0" width="3" height="36"/><rect x="44" y="0" width="1" height="36"/>
+                      <rect x="48" y="0" width="4" height="36"/><rect x="55" y="0" width="2" height="36"/><rect x="60" y="0" width="3" height="36"/>
+                      <rect x="66" y="0" width="1" height="36"/><rect x="70" y="0" width="5" height="36"/><rect x="78" y="0" width="2" height="36"/>
+                      <rect x="83" y="0" width="1" height="36"/><rect x="87" y="0" width="4" height="36"/><rect x="94" y="0" width="2" height="36"/>
+                      <rect x="99" y="0" width="3" height="36"/><rect x="105" y="0" width="1" height="36"/><rect x="109" y="0" width="4" height="36"/>
+                      <rect x="116" y="0" width="2" height="36"/><rect x="121" y="0" width="5" height="36"/><rect x="129" y="0" width="1" height="36"/>
+                      <rect x="133" y="0" width="3" height="36"/><rect x="139" y="0" width="2" height="36"/><rect x="144" y="0" width="4" height="36"/>
+                      <rect x="151" y="0" width="1" height="36"/><rect x="155" y="0" width="3" height="36"/><rect x="161" y="0" width="2" height="36"/>
+                      <rect x="166" y="0" width="5" height="36"/><rect x="174" y="0" width="1" height="36"/><rect x="178" y="0" width="3" height="36"/>
+                      <rect x="184" y="0" width="2" height="36"/><rect x="189" y="0" width="4" height="36"/><rect x="196" y="0" width="1" height="36"/>
+                      <rect x="200" y="0" width="3" height="36"/><rect x="206" y="0" width="2" height="36"/><rect x="211" y="0" width="4" height="36"/>
+                    </svg>
+                    <p class="text-[10px] font-mono text-slate-400 mt-1 tracking-widest">NXU*20238841*FALL26</p>
+                  </div>
+                  <!-- Compact QR Icon Box -->
+                  <div class="w-12 h-12 rounded-xl bg-white p-1.5 text-slate-900 flex items-center justify-center shrink-0">
+                    <i class="ph-bold ph-qr-code text-3xl"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Academic Advisor & Degree Progress Card -->
+              <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-5 shadow-2xs">
+                <div>
+                  <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Academic Advisor</h3>
+                  <div class="flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-brand-600 dark:text-brand-400 font-bold flex items-center justify-center text-sm shrink-0">
+                      DR
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm font-bold">Dr. Elena Rostova, Ph.D.</p>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">Associate Professor of Computer Science</p>
+                      <p class="text-xs text-brand-600 dark:text-brand-400 font-mono mt-0.5">e.rostova@nexus.edu • Turing Hall 412</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <div class="flex items-center justify-between text-xs mb-2">
+                    <span class="font-bold">B.S. Computer Science Requirements</span>
+                    <span class="font-mono font-bold text-brand-600 dark:text-brand-400">94 / 120 Credits (78.3%)</span>
+                  </div>
+                  <div class="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-brand-600 to-indigo-500 rounded-full" style="width: 78.3%"></div>
+                  </div>
+                  <div class="grid grid-cols-3 gap-2 mt-3 text-[11px]">
+                    <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60">
+                      <span class="text-slate-500 dark:text-slate-400 block">Core CS</span>
+                      <strong class="font-mono text-slate-800 dark:text-slate-200">48 / 54 cr</strong>
+                    </div>
+                    <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60">
+                      <span class="text-slate-500 dark:text-slate-400 block">Math Minor</span>
+                      <strong class="font-mono text-slate-800 dark:text-slate-200">18 / 21 cr</strong>
+                    </div>
+                    <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60">
+                      <span class="text-slate-500 dark:text-slate-400 block">Gen Ed</span>
+                      <strong class="font-mono text-emerald-600 dark:text-emerald-400">28 / 28 cr</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Editable Personal & Contact Information Form (7 cols) -->
+            <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-2xs">
+              <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100 dark:border-slate-800">
+                <div>
+                  <h2 class="text-base font-bold">Personal & Contact Information</h2>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">Updates are saved locally to your browser profile</p>
+                </div>
+                <span class="text-xs font-medium text-slate-400 flex items-center gap-1">
+                  <i class="ph ph-hard-drives"></i>
+                  localStorage Sync
+                </span>
+              </div>
+
+              <form id="profile-form" onsubmit="saveStudentProfile(event)" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Full Legal Name</label>
+                    <input
+                      id="prof-fullname"
+                      type="text"
+                      required
+                      class="w-full px-3.5 py-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:border-brand-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">University Email (Read-Only)</label>
+                    <input
+                      type="email"
+                      value="a.rivera23@nexus.edu"
+                      disabled
+                      class="w-full px-3.5 py-2.5 text-sm rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 text-slate-500 cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Mobile Phone Number</label>
+                    <input
+                      id="prof-phone"
+                      type="tel"
+                      required
+                      class="w-full px-3.5 py-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:border-brand-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Secondary / Personal Email</label>
+                    <input
+                      id="prof-secondary-email"
+                      type="email"
+                      required
+                      class="w-full px-3.5 py-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:border-brand-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Campus Residence / Mailing Address</label>
+                    <input
+                      id="prof-address"
+                      type="text"
+                      class="w-full px-3.5 py-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:border-brand-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Avatar Style Seed</label>
+                    <select id="prof-avatar-seed" class="w-full px-3.5 py-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:border-brand-500 focus:outline-none">
+                      <option value="AlexRivera">Default Scholar (Alex)</option>
+                      <option value="CyberCoder">Tech Minimalist</option>
+                      <option value="MapleLeaf">Autumn Campus</option>
+                      <option value="Starlight">Creative Studio</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="pt-2">
+                  <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Emergency Contact (Name, Relationship & Phone)</label>
+                  <input
+                    id="prof-emergency"
+                    type="text"
+                    required
+                    class="w-full px-3.5 py-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:border-brand-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Academic Bio & Research Interests</label>
+                  <textarea
+                    id="prof-bio"
+                    rows="3"
+                    class="w-full px-3.5 py-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:border-brand-500 focus:outline-none resize-none"
+                  ></textarea>
+                </div>
+
+                <div class="pt-3 flex items-center justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
+                  <button type="button" onclick="loadProfileForm()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    Discard Changes
+                  </button>
+                  <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-xs transition-colors flex items-center gap-2">
+                    <i class="ph-bold ph-floppy-disk"></i>
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Footer -->
+      <footer class="border-t border-slate-200 dark:border-slate-800 py-4 px-6 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+        <span>&copy; 2026 Nexus University Student Information System • Static Frontend Build</span>
+        <span class="font-mono text-[11px]">v2.4.0 • LocalStorage Persistence Active</span>
+      </footer>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL: CLASS DETAILS / ANNOUNCEMENT READER
+  ========================================================== -->
+  <div id="universal-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-lg w-full p-6 shadow-2xl transform transition-all relative">
+      <button onclick="closeModal()" class="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Close modal">
+        <i class="ph-bold ph-x text-lg"></i>
+      </button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       JAVASCRIPT APPLICATION LOGIC
+  ========================================================== -->
+  <script>
+    // ---------------------------------------------------------
+    // 1. DEFAULT DATASET (FALL 2026 - ALEX RIVERA)
+    // ---------------------------------------------------------
+    const DEFAULT_DATA = {
+      profile: {
+        fullName: "Alex Rivera",
+        phone: "+1 (555) 234-8910",
+        secondaryEmail: "alex.rivera.dev@gmail.com",
+        address: "Northwood Honors Hall, Apt 4B, Campus Way",
+        emergencyContact: "Maria Rivera (Mother) — +1 (555) 876-5432",
+        bio: "Senior Computer Science major with a minor in Applied Mathematics. Passionate about distributed systems, human-computer interaction, and undergraduate machine learning research.",
+        avatarSeed: "AlexRivera"
+      },
+      tasks: [
+        { id: "t1", title: "Distributed Consensus Raft Lab Implementation", course: "CS 401", due: "2026-11-27", completed: false },
+        { id: "t2", title: "Problem Set 9: Eigenvalues & SVD Proofs", course: "MATH 310", due: "2026-11-28", completed: false },
+        { id: "t3", title: "UI/UX Heuristic Evaluation Report", course: "CS 340", due: "2026-12-01", completed: false },
+        { id: "t4", title: "Bayesian Inference Quiz Prep", course: "STAT 302", due: "2026-11-24", completed: true },
+        { id: "t5", title: "Ethics in AI Reading Reflection #6", course: "PHIL 210", due: "2026-11-23", completed: true }
+      ],
+      courses: [
+        {
+          code: "CS 401",
+          name: "Distributed Systems",
+          credits: 4,
+          instructor: "Dr. Marcus Vance",
+          email: "m.vance@nexus.edu",
+          officeHours: "Tue & Thu 2:00 PM – 3:30 PM (Turing 305)",
+          room: "Turing Hall 101",
+          color: "indigo",
+          progress: 82,
+          syllabus: "Covers fault-tolerant distributed architectures, logical clocks, consensus protocols (Paxos, Raft), distributed storage engines, and replication.",
+          schedule: [
+            { day: "Monday", start: "09:00", end: "10:30" },
+            { day: "Wednesday", start: "09:00", end: "10:30" }
+          ]
+        },
+        {
+          code: "CS 340",
+          name: "Human-Computer Interaction",
+          credits: 3,
+          instructor: "Prof. Sarah Lin",
+          email: "s.lin@nexus.edu",
+          officeHours: "Wed 1:00 PM – 3:00 PM (Design Lab 204)",
+          room: "Innovation Center 210",
+          color: "emerald",
+          progress: 78,
+          syllabus: "Principles of user-centered design, cognitive load, accessibility standards (WCAG), rapid prototyping, and empirical usability testing.",
+          schedule: [
+            { day: "Tuesday", start: "10:30", end: "12:00" },
+            { day: "Thursday", start: "10:30", end: "12:00" }
+          ]
+        },
+        {
+          code: "MATH 310",
+          name: "Linear Algebra & Matrix Theory",
+          credits: 4,
+          instructor: "Dr. David K. Thorne",
+          email: "d.thorne@nexus.edu",
+          officeHours: "Mon & Wed 3:00 PM – 4:15 PM (Euler 118)",
+          room: "Euler Building 304",
+          color: "amber",
+          progress: 80,
+          syllabus: "Vector spaces, linear transformations, orthogonality, spectral theorem, singular value decomposition, and numerical matrix methods.",
+          schedule: [
+            { day: "Monday", start: "13:00", end: "14:30" },
+            { day: "Wednesday", start: "13:00", end: "14:30" },
+            { day: "Friday", start: "10:00", end: "11:00" }
+          ]
+        },
+        {
+          code: "STAT 302",
+          name: "Probability & Statistical Inference",
+          credits: 3,
+          instructor: "Dr. Priya Nair",
+          email: "p.nair@nexus.edu",
+          officeHours: "Thu 1:00 PM – 2:30 PM (Euler 210)",
+          room: "Euler Building 112",
+          color: "sky",
+          progress: 75,
+          syllabus: "Multivariate distributions, maximum likelihood estimation, hypothesis testing, confidence intervals, and Bayesian inference.",
+          schedule: [
+            { day: "Tuesday", start: "14:00", end: "15:30" },
+            { day: "Thursday", start: "14:00", end: "15:30" }
+          ]
+        },
+        {
+          code: "PHIL 210",
+          name: "Ethics of Artificial Intelligence",
+          credits: 2,
+          instructor: "Prof. Julian Mercer",
+          email: "j.mercer@nexus.edu",
+          officeHours: "Fri 1:00 PM – 2:30 PM (Humanities 408)",
+          room: "Humanities Hall 202",
+          color: "rose",
+          progress: 85,
+          syllabus: "Algorithmic fairness, transparency, autonomous decision-making, data privacy, and governance frameworks for emerging technologies.",
+          schedule: [
+            { day: "Wednesday", start: "15:30", end: "17:00" }
+          ]
+        }
+      ],
+      gradesByTerm: {
+        "Fall 2026": [
+          {
+            code: "CS 401", name: "Distributed Systems", credits: 4, midterm: 92, assignments: 96, score: 94.2, defaultGrade: "A",
+            breakdown: [
+              { item: "Lab 1: RPC Framework", weight: "15%", score: "98/100" },
+              { item: "Lab 2: Primary-Backup Replication", weight: "20%", score: "94/100" },
+              { item: "Midterm Examination", weight: "30%", score: "92/100" },
+              { item: "Lab 3: Raft Consensus (In Progress)", weight: "20%", score: "95/100" }
+            ]
+          },
+          {
+            code: "CS 340", name: "Human-Computer Interaction", credits: 3, midterm: 95, assignments: 98, score: 96.8, defaultGrade: "A",
+            breakdown: [
+              { item: "Needfinding & User Interviews", weight: "20%", score: "98/100" },
+              { item: "Interactive Figma Prototype", weight: "25%", score: "97/100" },
+              { item: "Midterm Design Critique", weight: "25%", score: "95/100" },
+              { item: "Accessibility Audit", weight: "15%", score: "99/100" }
+            ]
+          },
+          {
+            code: "MATH 310", name: "Linear Algebra & Matrix Theory", credits: 4, midterm: 87, assignments: 91, score: 89.4, defaultGrade: "A-",
+            breakdown: [
+              { item: "Problem Sets 1–8 Average", weight: "30%", score: "91/100" },
+              { item: "Midterm Exam I", weight: "25%", score: "86/100" },
+              { item: "Midterm Exam II", weight: "25%", score: "88/100" }
+            ]
+          },
+          {
+            code: "STAT 302", name: "Probability & Statistical Inference", credits: 3, midterm: 90, assignments: 93, score: 91.5, defaultGrade: "A-",
+            breakdown: [
+              { item: "R Statistical Computing Labs", weight: "25%", score: "94/100" },
+              { item: "Weekly Quizzes", weight: "20%", score: "92/100" },
+              { item: "Midterm Examination", weight: "30%", score: "90/100" }
+            ]
+          },
+          {
+            code: "PHIL 210", name: "Ethics of Artificial Intelligence", credits: 2, midterm: 96, assignments: 95, score: 95.4, defaultGrade: "A",
+            breakdown: [
+              { item: "Case Study Brief: Algorithmic Bias", weight: "30%", score: "96/100" },
+              { item: "Seminar Participation & Reflections", weight: "30%", score: "95/100" },
+              { item: "Midterm Essay", weight: "40%", score: "96/100" }
+            ]
+          }
+        ],
+        "Spring 2026": [
+          { code: "CS 320", name: "Operating Systems", credits: 4, midterm: 91, assignments: 94, score: 93.0, defaultGrade: "A", breakdown: [{ item: "Kernel Threads & Scheduler", weight: "40%", score: "94/100" }, { item: "Final Exam", weight: "35%", score: "92/100" }] },
+          { code: "CS 315", name: "Database Management Systems", credits: 4, midterm: 94, assignments: 97, score: 95.8, defaultGrade: "A", breakdown: [{ item: "B+ Tree Indexing Engine", weight: "40%", score: "97/100" }, { item: "Final Exam", weight: "35%", score: "94/100" }] },
+          { code: "MATH 240", name: "Discrete Mathematics II", credits: 3, midterm: 88, assignments: 90, score: 89.2, defaultGrade: "A-", breakdown: [{ item: "Graph Theory Proofs", weight: "50%", score: "90/100" }, { item: "Final Exam", weight: "50%", score: "88/100" }] },
+          { code: "ENG 205", name: "Technical & Scientific Writing", credits: 3, midterm: 95, assignments: 96, score: 95.6, defaultGrade: "A", breakdown: [{ item: "Research Grant Proposal", weight: "60%", score: "96/100" }, { item: "Peer Review Portfolio", weight: "40%", score: "95/100" }] }
+        ],
+        "Fall 2025": [
+          { code: "CS 250", name: "Algorithms & Data Structures", credits: 4, midterm: 89, assignments: 93, score: 91.2, defaultGrade: "A-", breakdown: [{ item: "Dynamic Programming Suite", weight: "45%", score: "93/100" }, { item: "Final Exam", weight: "35%", score: "89/100" }] },
+          { code: "CS 230", name: "Computer Architecture", credits: 4, midterm: 86, assignments: 90, score: 88.0, defaultGrade: "B+", breakdown: [{ item: "RISC-V Pipelined Simulator", weight: "50%", score: "90/100" }, { item: "Final Exam", weight: "30%", score: "86/100" }] },
+          { code: "PHYS 201", name: "Electromagnetism & Optics", credits: 4, midterm: 85, assignments: 92, score: 88.5, defaultGrade: "B+", breakdown: [{ item: "Lab Practicum", weight: "30%", score: "92/100" }, { item: "Final Exam", weight: "40%", score: "85/100" }] }
+        ]
+      },
+      announcements: [
+        {
+          id: "ann-1",
+          title: "Spring 2027 Priority Course Registration Opens Dec 2",
+          category: "Academic",
+          date: "Nov 24, 2026",
+          author: "Office of the University Registrar",
+          summary: "Senior standing students may begin enrolling in Spring 2027 courses starting December 2 at 8:00 AM EST. Ensure all advisor holds are cleared.",
+          body: "Priority registration for the Spring 2027 semester begins next week. As a Senior (90+ earned credits), your registration window opens on Wednesday, December 2, 2026 at 8:00 AM. Please verify your Degree Audit worksheet and meet with your academic advisor prior to registration to lift any advising holds.",
+          pinned: true,
+          read: false
+        },
+        {
+          id: "ann-2",
+          title: "Campus Network Maintenance Window — Nov 29 (2:00 AM – 5:00 AM)",
+          category: "Urgent",
+          date: "Nov 25, 2026",
+          author: "University Information Technology",
+          summary: "Scheduled core router upgrades will cause intermittent Wi-Fi and VPN interruptions across residence halls early Sunday morning.",
+          body: "University IT will perform critical firmware upgrades on campus core switches on Sunday, November 29 between 2:00 AM and 5:00 AM. During this window, Nexus-Secure Wi-Fi, campus VPN, and library database authentication may experience brief 10-15 minute outages. Please save all cloud work beforehand.",
+          pinned: true,
+          read: false
+        },
+        {
+          id: "ann-3",
+          title: "Winter HackNexus 2026: 36-Hour AI & Systems Hackathon",
+          category: "Campus Events",
+          date: "Nov 22, 2026",
+          author: "ACM Student Chapter",
+          summary: "Join 300+ student builders at the Innovation Center on Dec 6–7 for workshops, mentorship, and $12,000 in prizes.",
+          body: "Applications are officially open for Winter HackNexus 2026! Form teams of up to 4 students and build solutions across Tracks in Distributed Cloud, Sustainable Tech, and Accessible AI. Meals, swag, and overnight workspace in the Innovation Center are provided free of charge.",
+          pinned: false,
+          read: false
+        },
+        {
+          id: "ann-4",
+          title: "2027–2028 Merit Scholarship & Research Fellowship Applications",
+          category: "Financial/Admin",
+          date: "Nov 19, 2026",
+          author: "Financial Aid & Scholarships Office",
+          summary: "Students with a cumulative GPA of 3.50 or higher are invited to apply for departmental honors fellowships by January 15.",
+          body: "The Office of Financial Aid is now accepting applications for continuing undergraduate merit awards and Spring/Summer Undergraduate Research Fellowships (SURF). Applicants must submit a 500-word statement of purpose and one faculty recommendation.",
+          pinned: false,
+          read: true
+        },
+        {
+          id: "ann-5",
+          title: "Extended Final Exam Study Hours at Main Science Library",
+          category: "Academic",
+          date: "Nov 18, 2026",
+          author: "University Libraries",
+          summary: "Starting December 1, the Science & Engineering Library will remain open 24/7 with quiet study zones and free coffee carts.",
+          body: "To support students during final projects and exams, the Main Science Library will transition to 24-hour operations from December 1 through December 18. Group study rooms can be reserved up to 4 hours per day via the library kiosk.",
+          pinned: false,
+          read: true
+        }
+      ],
+      gpaHistory: [
+        { term: "Fall 24", gpa: 3.74 },
+        { term: "Spr 25", gpa: 3.81 },
+        { term: "Fall 25", gpa: 3.83 },
+        { term: "Spr 26", gpa: 3.92 },
+        { term: "Fall 26*", gpa: 3.90 }
+      ]
+    };
+
+    // Grade Point Map
+    const GRADE_POINTS = {
+      "A": 4.0,
+      "A-": 3.7,
+      "B+": 3.3,
+      "B": 3.0,
+      "B-": 2.7,
+      "C+": 2.3,
+      "C": 2.0,
+      "D": 1.0,
+      "F": 0.0
+    };
+
+    // Color Badges Helper for Courses
+    const COURSE_STYLES = {
+      indigo: {
+        bg: "bg-indigo-50 dark:bg-indigo-950/60",
+        border: "border-indigo-200 dark:border-indigo-800/80",
+        text: "text-indigo-700 dark:text-indigo-300",
+        dot: "bg-indigo-500",
+        pill: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/70 dark:text-indigo-200"
+      },
+      emerald: {
+        bg: "bg-emerald-50 dark:bg-emerald-950/60",
+        border: "border-emerald-200 dark:border-emerald-800/80",
+        text: "text-emerald-700 dark:text-emerald-300",
+        dot: "bg-emerald-500",
+        pill: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/70 dark:text-emerald-200"
+      },
+      amber: {
+        bg: "bg-amber-50 dark:bg-amber-950/60",
+        border: "border-amber-200 dark:border-amber-800/80",
+        text: "text-amber-700 dark:text-amber-300",
+        dot: "bg-amber-500",
+        pill: "bg-amber-100 text-amber-800 dark:bg-amber-900/70 dark:text-amber-200"
+      },
+      sky: {
+        bg: "bg-sky-50 dark:bg-sky-950/60",
+        border: "border-sky-200 dark:border-sky-800/80",
+        text: "text-sky-700 dark:text-sky-300",
+        dot: "bg-sky-500",
+        pill: "bg-sky-100 text-sky-800 dark:bg-sky-900/70 dark:text-sky-200"
+      },
+      rose: {
+        bg: "bg-rose-50 dark:bg-rose-950/60",
+        border: "border-rose-200 dark:border-rose-800/80",
+        text: "text-rose-700 dark:text-rose-300",
+        dot: "bg-rose-500",
+        pill: "bg-rose-100 text-rose-800 dark:bg-rose-900/70 dark:text-rose-200"
+      }
+    };
+
+    // ---------------------------------------------------------
+    // 2. STATE MANAGEMENT & LOCALSTORAGE PERSISTENCE
+    // ---------------------------------------------------------
+    const STORAGE_KEY = "nexus_student_portal_v1";
+
+    let appState = {
+      activeView: "dashboard",
+      theme: "light",
+      taskFilter: "all",
+      scheduleViewMode: "grid",
+      announcementCategory: "All",
+      simulatedGrades: {}, // e.g., { "Fall 2026_CS 401": "A-" }
+      expandedGradeRows: {},
+      data: JSON.parse(JSON.stringify(DEFAULT_DATA))
+    };
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.profile) appState.data.profile = { ...DEFAULT_DATA.profile, ...parsed.profile };
+          if (Array.isArray(parsed.tasks)) appState.data.tasks = parsed.tasks;
+          if (Array.isArray(parsed.announcements)) appState.data.announcements = parsed.announcements;
+          if (parsed.theme) appState.theme = parsed.theme;
+        }
+      } catch (e) {
+        console.warn("Could not read from localStorage:", e);
+      }
+      applyTheme(appState.theme);
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          profile: appState.data.profile,
+          tasks: appState.data.tasks,
+          announcements: appState.data.announcements,
+          theme: appState.theme
+        }));
+      } catch (e) {
+        console.warn("Could not save to localStorage:", e);
+      }
+    }
+
+    function resetDemoData() {
+      localStorage.removeItem(STORAGE_KEY);
+      appState.data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+      appState.simulatedGrades = {};
+      renderAll();
+      showToast("Demo data restored to default state.", "info");
+    }
+
+    // ---------------------------------------------------------
+    // 3. THEME & NAVIGATION
+    // ---------------------------------------------------------
+    function applyTheme(theme) {
+      const html = document.documentElement;
+      const icon = document.getElementById("theme-icon");
+      if (theme === "dark") {
+        html.classList.add("dark");
+        html.classList.remove("light");
+        if (icon) icon.className = "ph ph-sun text-lg text-amber-400";
+      } else {
+        html.classList.remove("dark");
+        html.classList.add("light");
+        if (icon) icon.className = "ph ph-moon text-lg";
+      }
+    }
+
+    function toggleTheme() {
+      appState.theme = appState.theme === "dark" ? "light" : "dark";
+      applyTheme(appState.theme);
+      saveState();
+    }
+
+    function toggleSidebar(open) {
+      const sidebar = document.getElementById("sidebar");
+      const backdrop = document.getElementById("mobile-backdrop");
+      if (open) {
+        sidebar.classList.remove("-translate-x-full");
+        backdrop.classList.remove("hidden");
+      } else {
+        sidebar.classList.add("-translate-x-full");
+        backdrop.classList.add("hidden");
+      }
+    }
+
+    function navigateTo(viewId) {
+      appState.activeView = viewId;
+
+      // Toggle sections
+      document.querySelectorAll(".view-section").forEach(sec => sec.classList.add("hidden"));
+      const target = document.getElementById(`view-${viewId}`);
+      if (target) target.classList.remove("hidden");
+
+      // Update sidebar active styles
+      document.querySelectorAll(".nav-item").forEach(btn => {
+        const isCurrent = btn.getAttribute("data-nav") === viewId;
+        if (isCurrent) {
+          btn.className = "nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold bg-brand-50 text-brand-700 dark:bg-brand-950/80 dark:text-brand-300 shadow-2xs transition-all";
+        } else {
+          btn.className = "nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-slate-100 transition-all";
+        }
+      });
+
+      // Close mobile drawer
+      toggleSidebar(false);
+    }
+
+    // ---------------------------------------------------------
+    // 4. TOAST NOTIFICATIONS & MODAL HELPERS
+    // ---------------------------------------------------------
+    function showToast(message, type = "success") {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+
+      const iconMap = {
+        success: `<i class="ph-fill ph-check-circle text-emerald-500 text-lg"></i>`,
+        info: `<i class="ph-fill ph-info text-brand-500 text-lg"></i>`,
+        warning: `<i class="ph-fill ph-warning-circle text-amber-500 text-lg"></i>`
+      };
+
+      toast.className = "pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 shadow-lg text-xs font-semibold transform transition-all duration-300 translate-y-2 opacity-0";
+      toast.innerHTML = `${iconMap[type] || iconMap.success}<span>${message}</span>`;
+
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove("translate-y-2", "opacity-0");
+      });
+
+      setTimeout(() => {
+        toast.classList.add("translate-y-2", "opacity-0");
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    function openModal(htmlContent) {
+      const modal = document.getElementById("universal-modal");
+      document.getElementById("modal-content").innerHTML = htmlContent;
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeModal() {
+      const modal = document.getElementById("universal-modal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    // Close modal on Escape key or backdrop click
+    document.getElementById("universal-modal").addEventListener("click", (e) => {
+      if (e.target.id === "universal-modal") closeModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeModal();
+        toggleNotifications(false);
+        document.getElementById("global-search-results").classList.add("hidden");
+      }
+    });
+
+    // ---------------------------------------------------------
+    // 5. HEADER SEARCH & NOTIFICATIONS POPOVER
+    // ---------------------------------------------------------
+    function toggleNotifications(forceState) {
+      const pop = document.getElementById("notif-popover");
+      const shouldShow = typeof forceState === "boolean" ? forceState : pop.classList.contains("hidden");
+      if (shouldShow) {
+        renderNotificationPopover();
+        pop.classList.remove("hidden");
+      } else {
+        pop.classList.add("hidden");
+      }
+    }
+
+    function renderNotificationPopover() {
+      const list = document.getElementById("notif-popover-list");
+      const items = appState.data.announcements.slice(0, 4);
+      list.innerHTML = items.map(ann => `
+        <div onclick="openAnnouncementModal('${ann.id}'); toggleNotifications(false);" class="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/70 cursor-pointer transition-colors flex items-start gap-3">
+          <span class="w-2 h-2 rounded-full mt-1.5 shrink-0 ${ann.read ? 'bg-slate-300 dark:bg-slate-700' : 'bg-brand-600'}"></span>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-semibold truncate ${ann.read ? 'text-slate-600 dark:text-slate-400' : 'text-slate-900 dark:text-white'}">${ann.title}</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${ann.category} • ${ann.date}</p>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function updateUnreadBadges() {
+      const unreadCount = appState.data.announcements.filter(a => !a.read).length;
+      const navBadge = document.getElementById("nav-unread-badge");
+      const headerDot = document.getElementById("header-notif-dot");
+
+      if (unreadCount > 0) {
+        navBadge.textContent = unreadCount;
+        navBadge.classList.remove("hidden");
+        headerDot.classList.remove("hidden");
+      } else {
+        navBadge.classList.add("hidden");
+        headerDot.classList.add("hidden");
+      }
+    }
+
+    function handleGlobalSearch(query) {
+      const box = document.getElementById("global-search-results");
+      const q = query.trim().toLowerCase();
+      if (!q) {
+        box.classList.add("hidden");
+        return;
+      }
+
+      const matchedCourses = appState.data.courses.filter(c =>
+        c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q) || c.instructor.toLowerCase().includes(q)
+      );
+      const matchedTasks = appState.data.tasks.filter(t =>
+        t.title.toLowerCase().includes(q) || t.course.toLowerCase().includes(q)
+      );
+      const matchedAnns = appState.data.announcements.filter(a =>
+        a.title.toLowerCase().includes(q) || a.summary.toLowerCase().includes(q)
+      );
+
+      if (!matchedCourses.length && !matchedTasks.length && !matchedAnns.length) {
+        box.innerHTML = `<div class="p-4 text-center text-xs text-slate-500">No results found for "${escapeHtml(query)}"</div>`;
+        box.classList.remove("hidden");
+        return;
+      }
+
+      let html = "";
+      if (matchedCourses.length) {
+        html += `<div class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Courses</div>`;
+        html += matchedCourses.map(c => `
+          <button onclick="openCourseModal('${c.code}'); document.getElementById('global-search-results').classList.add('hidden');" class="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between text-xs">
+            <span><strong>${c.code}</strong> — ${c.name}</span>
+            <span class="text-slate-400">${c.room}</span>
+          </button>
+        `).join("");
+      }
+      if (matchedTasks.length) {
+        html += `<div class="px-2.5 py-1 mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Tasks</div>`;
+        html += matchedTasks.map(t => `
+          <button onclick="navigateTo('dashboard'); document.getElementById('global-search-results').classList.add('hidden');" class="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between text-xs">
+            <span class="truncate pr-2">${escapeHtml(t.title)}</span>
+            <span class="font-mono text-[11px] text-brand-600 dark:text-brand-400 shrink-0">${t.course}</span>
+          </button>
+        `).join("");
+      }
+      if (matchedAnns.length) {
+        html += `<div class="px-2.5 py-1 mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Announcements</div>`;
+        html += matchedAnns.map(a => `
+          <button onclick="openAnnouncementModal('${a.id}'); document.getElementById('global-search-results').classList.add('hidden');" class="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 block text-xs">
+            <p class="font-semibold truncate">${a.title}</p>
+            <p class="text-[11px] text-slate-400">${a.category} • ${a.date}</p>
+          </button>
+        `).join("");
+      }
+
+      box.innerHTML = html;
+      box.classList.remove("hidden");
+    }
+
+    // ---------------------------------------------------------
+    // 6. VIEW 1: DASHBOARD RENDERING & TASK ACTIONS
+    // ---------------------------------------------------------
+    function renderDashboard() {
+      // Sync student first name
+      const firstName = appState.data.profile.fullName.split(" ")[0] || "Alex";
+      document.getElementById("welcome-first-name").textContent = firstName;
+
+      // Today's Classes (Wednesday default)
+      const todayName = "Wednesday";
+      const todaysClasses = [];
+      appState.data.courses.forEach(course => {
+        course.schedule.forEach(slot => {
+          if (slot.day === todayName) {
+            todaysClasses.push({ ...course, start: slot.start, end: slot.end });
+          }
+        });
+      });
+      todaysClasses.sort((a, b) => a.start.localeCompare(b.start));
+
+      document.getElementById("welcome-classes-count").textContent = `${todaysClasses.length} classes`;
+
+      const classesEl = document.getElementById("dashboard-today-classes");
+      classesEl.innerHTML = todaysClasses.map((cls, idx) => {
+        const st = COURSE_STYLES[cls.color] || COURSE_STYLES.indigo;
+        const statuses = [
+          { label: "Completed", badge: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400" },
+          { label: "In Progress", badge: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300" },
+          { label: "Upcoming", badge: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300" }
+        ];
+        const status = statuses[idx] || statuses[2];
+
+        return `
+          <div onclick="openCourseModal('${cls.code}')" class="group cursor-pointer p-3.5 rounded-xl border ${st.border} ${st.bg} hover:shadow-xs transition-all flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="text-xs font-mono font-bold ${st.text} shrink-0 w-14">
+                <div>${cls.start}</div>
+                <div class="text-[10px] opacity-75">${cls.end}</div>
+              </div>
+              <div class="w-1 h-9 rounded-full ${st.dot} shrink-0"></div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold ${st.text}">${cls.code}</span>
+                  <span class="text-xs font-semibold truncate text-slate-900 dark:text-slate-100 group-hover:underline">${cls.name}</span>
+                </div>
+                <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 flex items-center gap-1.5">
+                  <i class="ph ph-map-pin"></i> ${cls.room}
+                </p>
+              </div>
+            </div>
+            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${status.badge}">
+              ${status.label}
+            </span>
+          </div>
+        `;
+      }).join("");
+
+      // Tasks Rendering
+      renderTasksList();
+
+      // GPA Chart Rendering
+      renderGpaSvgChart();
+
+      // Recent Announcements Preview
+      const previewEl = document.getElementById("dashboard-announcements-preview");
+      previewEl.innerHTML = appState.data.announcements.slice(0, 3).map(ann => `
+        <div onclick="openAnnouncementModal('${ann.id}')" class="cursor-pointer p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-brand-300 dark:hover:border-brand-700 bg-slate-50/60 dark:bg-slate-800/40 transition-all flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${getCategoryBadgeStyle(ann.category)}">${ann.category}</span>
+              <span class="text-[11px] text-slate-400">${ann.date}</span>
+              ${!ann.read ? `<span class="w-2 h-2 rounded-full bg-brand-600" title="Unread"></span>` : ""}
+            </div>
+            <h4 class="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">${ann.title}</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">${ann.summary}</p>
+          </div>
+          <i class="ph ph-caret-right text-slate-400 mt-1 shrink-0"></i>
+        </div>
+      `).join("");
+    }
+
+    function setTaskFilter(filter) {
+      appState.taskFilter = filter;
+      renderTasksList();
+    }
+
+    function renderTasksList() {
+      // Update filter button styles
+      document.querySelectorAll(".task-filter-btn").forEach(btn => {
+        const active = btn.getAttribute("data-task-filter") === appState.taskFilter;
+        btn.className = active
+          ? "task-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs transition-all"
+          : "task-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all";
+      });
+
+      const pendingCount = appState.data.tasks.filter(t => !t.completed).length;
+      document.getElementById("stat-pending-tasks").textContent = pendingCount;
+      document.getElementById("welcome-tasks-count").textContent = `${pendingCount} pending task${pendingCount === 1 ? '' : 's'}`;
+
+      const filtered = appState.data.tasks.filter(t => {
+        if (appState.taskFilter === "pending") return !t.completed;
+        if (appState.taskFilter === "completed") return t.completed;
+        return true;
+      });
+
+      const listEl = document.getElementById("dashboard-tasks-list");
+      if (!filtered.length) {
+        listEl.innerHTML = `
+          <div class="py-8 text-center text-xs text-slate-400">
+            <i class="ph ph-check-circle text-2xl block mx-auto mb-1 text-emerald-500"></i>
+            No tasks in this view. You're all caught up!
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(task => `
+        <div class="flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 hover:bg-slate-100/70 dark:hover:bg-slate-800/70 transition-colors">
+          <label class="flex items-center gap-3 cursor-pointer min-w-0 flex-1">
+            <input
+              type="checkbox"
+              ${task.completed ? "checked" : ""}
+              onchange="toggleTaskComplete('${task.id}')"
+              class="w-4 h-4 rounded-md accent-brand-600 cursor-pointer shrink-0"
+            />
+            <div class="min-w-0">
+              <p class="text-xs sm:text-sm font-medium truncate ${task.completed ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-100'}">
+                ${escapeHtml(task.title)}
+              </p>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-indigo-50 dark:bg-indigo-950 text-brand-600 dark:text-brand-400">${escapeHtml(task.course)}</span>
+                <span class="text-[11px] text-slate-400">Due ${task.due}</span>
+              </div>
+            </div>
+          </label>
+          <button onclick="deleteTask('${task.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors" title="Delete task">
+            <i class="ph ph-trash text-sm"></i>
+          </button>
+        </div>
+      `).join("");
+    }
+
+    function addNewTask(e) {
+      e.preventDefault();
+      const titleInput = document.getElementById("new-task-title");
+      const courseInput = document.getElementById("new-task-course");
+      const dueInput = document.getElementById("new-task-due");
+
+      const title = titleInput.value.trim();
+      if (!title) return;
+
+      appState.data.tasks.unshift({
+        id: "t-" + Date.now(),
+        title,
+        course: courseInput.value,
+        due: dueInput.value || "2026-12-05",
+        completed: false
+      });
+
+      titleInput.value = "";
+      saveState();
+      renderTasksList();
+      showToast("Task added to your workspace!");
+    }
+
+    function toggleTaskComplete(id) {
+      const task = appState.data.tasks.find(t => t.id === id);
+      if (task) {
+        task.completed = !task.completed;
+        saveState();
+        renderTasksList();
+      }
+    }
+
+    function deleteTask(id) {
+      appState.data.tasks = appState.data.tasks.filter(t => t.id !== id);
+      saveState();
+      renderTasksList();
+      showToast("Task removed.", "info");
+    }
+
+    function renderGpaSvgChart() {
+      const points = appState.data.gpaHistory;
+      const width = 360;
+      const height = 165;
+      const padX = 32;
+      const padY = 24;
+      const minGpa = 3.5;
+      const maxGpa = 4.0;
+
+      const coords = points.map((p, i) => {
+        const x = padX + (i * (width - padX * 2)) / (points.length - 1);
+        const norm = (p.gpa - minGpa) / (maxGpa - minGpa);
+        const y = height - padY - norm * (height - padY * 2);
+        return { x, y, ...p };
+      });
+
+      const polylinePoints = coords.map(c => `${c.x},${c.y}`).join(" ");
+      const areaPoints = `${coords[0].x},${height - padY} ${polylinePoints} ${coords[coords.length - 1].x},${height - padY}`;
+
+      const container = document.getElementById("gpa-chart-container");
+      container.innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" class="w-full h-auto overflow-visible">
+          <defs>
+            <linearGradient id="gpaAreaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#6366f1" stop-opacity="0.28"/>
+              <stop offset="100%" stop-color="#6366f1" stop-opacity="0.0"/>
+            </linearGradient>
+          </defs>
+          <!-- Horizontal Grid Lines -->
+          <line x1="${padX}" y1="${padY}" x2="${width - padX}" y2="${padY}" stroke="currentColor" class="text-slate-200 dark:text-slate-800" stroke-dasharray="3 3"/>
+          <line x1="${padX}" y1="${height / 2}" x2="${width - padX}" y2="${height / 2}" stroke="currentColor" class="text-slate-200 dark:text-slate-800" stroke-dasharray="3 3"/>
+          <line x1="${padX}" y1="${height - padY}" x2="${width - padX}" y2="${height - padY}" stroke="currentColor" class="text-slate-200 dark:text-slate-800"/>
+
+          <!-- Y Axis Labels -->
+          <text x="4" y="${padY + 4}" class="fill-slate-400 text-[10px] font-mono">4.00</text>
+          <text x="4" y="${height / 2 + 4}" class="fill-slate-400 text-[10px] font-mono">3.75</text>
+          <text x="4" y="${height - padY + 4}" class="fill-slate-400 text-[10px] font-mono">3.50</text>
+
+          <!-- Area & Line -->
+          <polygon points="${areaPoints}" fill="url(#gpaAreaGrad)" />
+          <polyline fill="none" stroke="#4f46e5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="${polylinePoints}" />
+
+          <!-- Data Nodes -->
+          ${coords.map(c => `
+            <g>
+              <circle cx="${c.x}" cy="${c.y}" r="4.5" class="fill-white dark:fill-slate-900 stroke-brand-600" stroke-width="2.5"/>
+              <text x="${c.x}" y="${c.y - 10}" text-anchor="middle" class="fill-slate-700 dark:fill-slate-200 text-[10px] font-mono font-bold">${c.gpa.toFixed(2)}</text>
+              <text x="${c.x}" y="${height - 5}" text-anchor="middle" class="fill-slate-400 text-[10px] font-medium">${c.term}</text>
+            </g>
+          `).join("")}
+        </svg>
+      `;
+    }
+
+    // ---------------------------------------------------------
+    // 7. VIEW 2: CLASS SCHEDULE
+    // ---------------------------------------------------------
+    function initScheduleFilters() {
+      const courseSelect = document.getElementById("schedule-course-filter");
+      courseSelect.innerHTML = `<option value="ALL">All Courses</option>` +
+        appState.data.courses.map(c => `<option value="${c.code}">${c.code} — ${c.name}</option>`).join("");
+
+      const legendEl = document.getElementById("schedule-legend");
+      legendEl.innerHTML = appState.data.courses.map(c => {
+        const st = COURSE_STYLES[c.color] || COURSE_STYLES.indigo;
+        return `
+          <button onclick="openCourseModal('${c.code}')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border ${st.border} ${st.bg} text-xs font-medium hover:shadow-2xs transition-all">
+            <span class="w-2 h-2 rounded-full ${st.dot}"></span>
+            <span class="font-bold ${st.text}">${c.code}</span>
+            <span class="text-slate-700 dark:text-slate-300 hidden sm:inline">${c.name}</span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function setScheduleViewMode(mode) {
+      appState.scheduleViewMode = mode;
+      renderSchedule();
+    }
+
+    function renderSchedule() {
+      const dayFilter = document.getElementById("schedule-day-filter").value;
+      const courseFilter = document.getElementById("schedule-course-filter").value;
+
+      const btnGrid = document.getElementById("btn-sched-grid");
+      const btnList = document.getElementById("btn-sched-list");
+      const gridContainer = document.getElementById("schedule-grid-container");
+      const listContainer = document.getElementById("schedule-list-container");
+
+      if (appState.scheduleViewMode === "grid") {
+        btnGrid.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs transition-all";
+        btnList.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 text-slate-500 dark:text-slate-400 transition-all";
+        gridContainer.classList.remove("hidden");
+        listContainer.classList.add("hidden");
+      } else {
+        btnList.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs transition-all";
+        btnGrid.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 text-slate-500 dark:text-slate-400 transition-all";
+        listContainer.classList.remove("hidden");
+        gridContainer.classList.add("hidden");
+      }
+
+      const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+      const visibleDays = dayFilter === "ALL" ? days : [dayFilter];
+
+      // Build Weekly Grid View
+      const timeSlots = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"];
+      let gridHtml = `
+        <div class="min-w-[720px]">
+          <div class="grid grid-cols-${visibleDays.length + 1} border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50">
+            <div class="p-3 text-xs font-bold uppercase tracking-wider text-slate-400 border-r border-slate-200 dark:border-slate-800">Time</div>
+            ${visibleDays.map(d => `
+              <div class="p-3 text-xs font-bold text-center ${d === 'Wednesday' ? 'text-brand-600 dark:text-brand-400 bg-brand-50/40 dark:bg-brand-950/20' : 'text-slate-700 dark:text-slate-200'}">
+                ${d} ${d === 'Wednesday' ? '<span class="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-brand-600 text-white">Today</span>' : ''}
+              </div>
+            `).join("")}
+          </div>
+      `;
+
+      timeSlots.forEach(hour => {
+        const hourPrefix = hour.slice(0, 2);
+        gridHtml += `<div class="grid grid-cols-${visibleDays.length + 1} border-b border-slate-100 dark:border-slate-800/80 min-h-[74px]">`;
+        gridHtml += `<div class="p-3 text-xs font-mono text-slate-400 border-r border-slate-200 dark:border-slate-800 flex items-start">${hour}</div>`;
+
+        visibleDays.forEach(day => {
+          // Find course starting in this hour
+          let cellCard = "";
+          appState.data.courses.forEach(course => {
+            if (courseFilter !== "ALL" && course.code !== courseFilter) return;
+            course.schedule.forEach(slot => {
+              if (slot.day === day && slot.start.startsWith(hourPrefix)) {
+                const st = COURSE_STYLES[course.color] || COURSE_STYLES.indigo;
+                cellCard = `
+                  <div onclick="openCourseModal('${course.code}')" class="cursor-pointer p-2.5 rounded-xl border ${st.border} ${st.bg} hover:shadow-sm transition-all h-full flex flex-col justify-between">
+                    <div>
+                      <div class="flex items-center justify-between gap-1">
+                        <span class="text-xs font-bold ${st.text}">${course.code}</span>
+                        <span class="text-[10px] font-mono text-slate-500 dark:text-slate-400">${slot.start}–${slot.end}</span>
+                      </div>
+                      <p class="text-xs font-semibold text-slate-900 dark:text-slate-100 leading-snug mt-0.5">${course.name}</p>
+                    </div>
+                    <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 flex items-center gap-1">
+                      <i class="ph ph-map-pin"></i> ${course.room}
+                    </p>
+                  </div>
+                `;
+              }
+            });
+          });
+
+          gridHtml += `<div class="p-1.5 border-r last:border-r-0 border-slate-100 dark:border-slate-800/60 ${day === 'Wednesday' ? 'bg-brand-50/15 dark:bg-brand-950/10' : ''}">${cellCard}</div>`;
+        });
+
+        gridHtml += `</div>`;
+      });
+
+      gridHtml += `</div>`;
+      gridContainer.innerHTML = gridHtml;
+
+      // Build List View
+      let listHtml = "";
+      visibleDays.forEach(day => {
+        const daySessions = [];
+        appState.data.courses.forEach(course => {
+          if (courseFilter !== "ALL" && course.code !== courseFilter) return;
+          course.schedule.forEach(slot => {
+            if (slot.day === day) {
+              daySessions.push({ ...course, start: slot.start, end: slot.end });
+            }
+          });
+        });
+        daySessions.sort((a, b) => a.start.localeCompare(b.start));
+
+        if (!daySessions.length) return;
+
+        listHtml += `
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-2xs">
+            <h3 class="text-sm font-bold mb-3 flex items-center gap-2">
+              <span>${day}</span>
+              ${day === 'Wednesday' ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-600 text-white">Today</span>' : ''}
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              ${daySessions.map(s => {
+                const st = COURSE_STYLES[s.color] || COURSE_STYLES.indigo;
+                return `
+                  <div onclick="openCourseModal('${s.code}')" class="cursor-pointer p-4 rounded-xl border ${st.border} ${st.bg} hover:shadow-xs transition-all flex items-center justify-between gap-3">
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold px-2 py-0.5 rounded-md ${st.pill}">${s.code}</span>
+                        <span class="text-xs font-mono font-semibold text-slate-600 dark:text-slate-300">${s.start} – ${s.end}</span>
+                      </div>
+                      <h4 class="text-sm font-bold text-slate-900 dark:text-white mt-1.5">${s.name}</h4>
+                      <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">${s.instructor} • ${s.room}</p>
+                    </div>
+                    <i class="ph ph-info text-lg ${st.text}"></i>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      });
+
+      listContainer.innerHTML = listHtml || `<div class="p-8 text-center text-sm text-slate-400 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">No classes match your current filter.</div>`;
+    }
+
+    function openCourseModal(courseCode) {
+      const course = appState.data.courses.find(c => c.code === courseCode);
+      if (!course) return;
+      const st = COURSE_STYLES[course.color] || COURSE_STYLES.indigo;
+
+      openModal(`
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-xs font-bold px-2.5 py-1 rounded-lg ${st.pill}">${course.code}</span>
+            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">${course.credits}.0 Credits</span>
+          </div>
+          <h2 class="text-xl font-bold text-slate-900 dark:text-white">${course.name}</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">${course.room} • ${course.schedule.map(s => `${s.day.slice(0,3)} ${s.start}–${s.end}`).join(", ")}</p>
+
+          <div class="mt-4 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700/70 space-y-2 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-slate-500 dark:text-slate-400">Instructor:</span>
+              <span class="font-semibold">${course.instructor}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-500 dark:text-slate-400">Email:</span>
+              <span class="font-mono text-brand-600 dark:text-brand-400">${course.email}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-500 dark:text-slate-400">Office Hours:</span>
+              <span class="font-medium text-right">${course.officeHours}</span>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Syllabus Overview</h4>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">${course.syllabus}</p>
+          </div>
+
+          <div class="mt-5">
+            <div class="flex items-center justify-between text-xs mb-1.5">
+              <span class="font-semibold">Term Syllabus Completion</span>
+              <span class="font-mono font-bold text-brand-600 dark:text-brand-400">${course.progress}%</span>
+            </div>
+            <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full bg-brand-600 rounded-full" style="width: ${course.progress}%"></div>
+            </div>
+          </div>
+        </div>
+      `);
+    }
+
+    // ---------------------------------------------------------
+    // 8. VIEW 3: GRADES & WHAT-IF GPA SIMULATOR
+    // ---------------------------------------------------------
+    function renderGrades() {
+      const term = document.getElementById("grades-semester-select").value;
+      const courses = appState.data.gradesByTerm[term] || [];
+
+      let totalPoints = 0;
+      let totalCredits = 0;
+      let isSimulated = false;
+
+      courses.forEach(c => {
+        const simKey = `${term}_${c.code}`;
+        const activeGrade = appState.simulatedGrades[simKey] || c.defaultGrade;
+        if (appState.simulatedGrades[simKey] && appState.simulatedGrades[simKey] !== c.defaultGrade) {
+          isSimulated = true;
+        }
+        const pts = GRADE_POINTS[activeGrade] ?? 4.0;
+        totalPoints += pts * c.credits;
+        totalCredits += c.credits;
+      });
+
+      const termGpa = totalCredits > 0 ? (totalPoints / totalCredits) : 0;
+      document.getElementById("grades-term-gpa").textContent = termGpa.toFixed(2);
+      document.getElementById("grades-term-credits-label").textContent = `${totalCredits}.0 Attempted Credits`;
+
+      const simBadge = document.getElementById("grades-sim-indicator");
+      if (isSimulated) {
+        simBadge.classList.remove("hidden");
+      } else {
+        simBadge.classList.add("hidden");
+      }
+
+      // Compute simulated cumulative GPA (base 94 credits @ 3.86 + current term)
+      const baseCredits = 94;
+      const basePoints = 94 * 3.86;
+      const newCumGpa = ((basePoints + totalPoints) / (baseCredits + totalCredits)).toFixed(2);
+      document.getElementById("grades-cum-gpa").textContent = newCumGpa;
+      document.getElementById("stat-cum-gpa").textContent = newCumGpa;
+
+      const tbody = document.getElementById("grades-table-body");
+      tbody.innerHTML = courses.map(c => {
+        const simKey = `${term}_${c.code}`;
+        const currentGrade = appState.simulatedGrades[simKey] || c.defaultGrade;
+        const isExpanded = !!appState.expandedGradeRows[simKey];
+
+        const gradeOptions = Object.keys(GRADE_POINTS).map(g =>
+          `<option value="${g}" ${g === currentGrade ? "selected" : ""}>${g} (${GRADE_POINTS[g].toFixed(1)})</option>`
+        ).join("");
+
+        return `
+          <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+            <td class="py-3.5 px-4">
+              <div class="font-bold text-slate-900 dark:text-white">${c.code}</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">${c.name}</div>
+            </td>
+            <td class="py-3.5 px-4 text-center font-mono text-xs">${c.credits}.0</td>
+            <td class="py-3.5 px-4 text-center font-mono text-xs">${c.midterm}%</td>
+            <td class="py-3.5 px-4 text-center font-mono text-xs">${c.assignments}%</td>
+            <td class="py-3.5 px-4 text-center font-mono font-semibold text-xs">${c.score.toFixed(1)}%</td>
+            <td class="py-3.5 px-4 text-center">
+              <select
+                onchange="handleGradeSimulation('${term}', '${c.code}', this.value)"
+                class="px-2.5 py-1 rounded-lg text-xs font-bold font-mono border ${currentGrade !== c.defaultGrade ? 'bg-amber-50 border-amber-300 text-amber-800 dark:bg-amber-950/60 dark:border-amber-700 dark:text-amber-300' : 'bg-indigo-50 border-indigo-200 text-brand-700 dark:bg-indigo-950/60 dark:border-indigo-800 dark:text-brand-300'} focus:outline-none cursor-pointer"
+              >
+                ${gradeOptions}
+              </select>
+            </td>
+            <td class="py-3.5 px-4 text-right">
+              <button onclick="toggleGradeRowExpand('${simKey}')" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 inline-flex items-center gap-1">
+                <span>Breakdown</span>
+                <i class="ph ph-caret-${isExpanded ? 'up' : 'down'}"></i>
+              </button>
+            </td>
+          </tr>
+          ${isExpanded ? `
+            <tr class="bg-slate-50/90 dark:bg-slate-800/30">
+              <td colspan="7" class="px-4 py-3.5">
+                <div class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Graded Components — ${c.code}</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                  ${c.breakdown.map(b => `
+                    <div class="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                      <div>
+                        <p class="text-xs font-medium text-slate-800 dark:text-slate-200">${b.item}</p>
+                        <p class="text-[10px] text-slate-400">Weight: ${b.weight}</p>
+                      </div>
+                      <span class="text-xs font-mono font-bold text-brand-600 dark:text-brand-400">${b.score}</span>
+                    </div>
+                  `).join("")}
+                </div>
+              </td>
+            </tr>
+          ` : ""}
+        `;
+      }).join("");
+    }
+
+    function handleGradeSimulation(term, code, newGrade) {
+      appState.simulatedGrades[`${term}_${code}`] = newGrade;
+      renderGrades();
+    }
+
+    function resetSimulatedGrades() {
+      appState.simulatedGrades = {};
+      renderGrades();
+      showToast("GPA simulator reset to actual scores.", "info");
+    }
+
+    function toggleGradeRowExpand(key) {
+      appState.expandedGradeRows[key] = !appState.expandedGradeRows[key];
+      renderGrades();
+    }
+
+    // ---------------------------------------------------------
+    // 9. VIEW 4: ANNOUNCEMENTS
+    // ---------------------------------------------------------
+    function getCategoryBadgeStyle(category) {
+      switch (category) {
+        case "Urgent":
+          return "bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300";
+        case "Academic":
+          return "bg-indigo-100 text-indigo-800 dark:bg-indigo-950/80 dark:text-indigo-300";
+        case "Campus Events":
+          return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300";
+        case "Financial/Admin":
+          return "bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300";
+        default:
+          return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+      }
+    }
+
+    function setAnnouncementCategory(cat) {
+      appState.announcementCategory = cat;
+      renderAnnouncements();
+    }
+
+    function renderAnnouncements() {
+      // Update Category Pills
+      document.querySelectorAll(".ann-cat-btn").forEach(btn => {
+        const active = btn.getAttribute("data-ann-cat") === appState.announcementCategory;
+        btn.className = active
+          ? "ann-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-brand-600 text-white shadow-2xs transition-all flex items-center gap-1"
+          : "ann-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center gap-1";
+      });
+
+      const query = (document.getElementById("announcement-search").value || "").trim().toLowerCase();
+
+      const filtered = appState.data.announcements.filter(ann => {
+        if (appState.announcementCategory === "Bookmarked" && !ann.pinned) return false;
+        if (appState.announcementCategory !== "All" && appState.announcementCategory !== "Bookmarked" && ann.category !== appState.announcementCategory) return false;
+        if (query && !ann.title.toLowerCase().includes(query) && !ann.summary.toLowerCase().includes(query) && !ann.author.toLowerCase().includes(query)) return false;
+        return true;
+      });
+
+      const feedEl = document.getElementById("announcements-feed");
+      if (!filtered.length) {
+        feedEl.innerHTML = `<div class="p-10 text-center text-sm text-slate-400 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">No announcements match your filter criteria.</div>`;
+        return;
+      }
+
+      feedEl.innerHTML = filtered.map(ann => `
+        <article class="bg-white dark:bg-slate-900 rounded-2xl border ${ann.read ? 'border-slate-200 dark:border-slate-800' : 'border-brand-300 dark:border-brand-700/80'} p-5 sm:p-6 shadow-2xs transition-all">
+          <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+            <div class="space-y-1.5">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md ${getCategoryBadgeStyle(ann.category)}">${ann.category}</span>
+                <span class="text-xs text-slate-400">${ann.date}</span>
+                <span class="text-xs text-slate-400">• ${ann.author}</span>
+                ${!ann.read ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-600 text-white">New</span>` : ""}
+              </div>
+              <h3 onclick="openAnnouncementModal('${ann.id}')" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white hover:text-brand-600 dark:hover:text-brand-400 cursor-pointer transition-colors">
+                ${ann.title}
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">${ann.summary}</p>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0 self-start">
+              <button onclick="toggleAnnouncementPin('${ann.id}')" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" title="${ann.pinned ? 'Unpin' : 'Pin announcement'}">
+                <i class="ph-${ann.pinned ? 'fill' : 'bold'} ph-bookmark-simple text-base ${ann.pinned ? 'text-amber-500' : 'text-slate-400'}"></i>
+              </button>
+              <button onclick="toggleAnnouncementRead('${ann.id}')" class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                ${ann.read ? "Mark Unread" : "Mark Read"}
+              </button>
+              <button onclick="openAnnouncementModal('${ann.id}')" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold hover:bg-brand-600 hover:text-white transition-colors">
+                Read Full
+              </button>
+            </div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function openAnnouncementModal(id) {
+      const ann = appState.data.announcements.find(a => a.id === id);
+      if (!ann) return;
+
+      if (!ann.read) {
+        ann.read = true;
+        saveState();
+        updateUnreadBadges();
+        renderAnnouncements();
+        renderDashboard();
+      }
+
+      openModal(`
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md ${getCategoryBadgeStyle(ann.category)}">${ann.category}</span>
+            <span class="text-xs text-slate-400">${ann.date}</span>
+          </div>
+          <h2 class="text-xl font-bold text-slate-900 dark:text-white leading-snug">${ann.title}</h2>
+          <p class="text-xs font-medium text-brand-600 dark:text-brand-400 mt-1">Posted by ${ann.author}</p>
+
+          <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-sm text-slate-700 dark:text-slate-300 leading-relaxed space-y-3">
+            <p>${ann.body}</p>
+          </div>
+
+          <div class="mt-6 flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
+            <button onclick="toggleAnnouncementPin('${ann.id}'); openAnnouncementModal('${ann.id}');" class="text-xs font-semibold flex items-center gap-1.5 text-slate-600 dark:text-slate-300 hover:text-amber-500">
+              <i class="ph-${ann.pinned ? 'fill' : 'bold'} ph-bookmark-simple ${ann.pinned ? 'text-amber-500' : ''}"></i>
+              ${ann.pinned ? "Pinned to Top" : "Bookmark Notice"}
+            </button>
+            <button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-xs font-semibold hover:bg-brand-700">Done</button>
+          </div>
+        </div>
+      `);
+    }
+
+    function toggleAnnouncementPin(id) {
+      const ann = appState.data.announcements.find(a => a.id === id);
+      if (ann) {
+        ann.pinned = !ann.pinned;
+        saveState();
+        renderAnnouncements();
+        showToast(ann.pinned ? "Announcement pinned!" : "Removed from pinned.", "info");
+      }
+    }
+
+    function toggleAnnouncementRead(id) {
+      const ann = appState.data.announcements.find(a => a.id === id);
+      if (ann) {
+        ann.read = !ann.read;
+        saveState();
+        updateUnreadBadges();
+        renderAnnouncements();
+        renderDashboard();
+      }
+    }
+
+    function markAllAnnouncementsRead() {
+      appState.data.announcements.forEach(a => a.read = true);
+      saveState();
+      updateUnreadBadges();
+      renderAnnouncements();
+      renderDashboard();
+      showToast("All announcements marked as read.");
+    }
+
+    // ---------------------------------------------------------
+    // 10. VIEW 5: STUDENT PROFILE
+    // ---------------------------------------------------------
+    function loadProfileForm() {
+      const p = appState.data.profile;
+      document.getElementById("prof-fullname").value = p.fullName;
+      document.getElementById("prof-phone").value = p.phone;
+      document.getElementById("prof-secondary-email").value = p.secondaryEmail;
+      document.getElementById("prof-address").value = p.address;
+      document.getElementById("prof-emergency").value = p.emergencyContact;
+      document.getElementById("prof-bio").value = p.bio;
+      document.getElementById("prof-avatar-seed").value = p.avatarSeed || "AlexRivera";
+
+      syncProfileDisplays();
+    }
+
+    function syncProfileDisplays() {
+      const p = appState.data.profile;
+      const avatarUrl = `https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(p.avatarSeed || "AlexRivera")}&backgroundColor=e0e7ff`;
+
+      document.getElementById("header-student-name").textContent = p.fullName;
+      document.getElementById("id-card-name").textContent = p.fullName;
+      document.getElementById("header-avatar").src = avatarUrl;
+      document.getElementById("id-card-avatar").src = avatarUrl;
+      document.getElementById("welcome-first-name").textContent = p.fullName.split(" ")[0] || "Alex";
+    }
+
+    function saveStudentProfile(e) {
+      e.preventDefault();
+      appState.data.profile = {
+        fullName: document.getElementById("prof-fullname").value.trim() || "Alex Rivera",
+        phone: document.getElementById("prof-phone").value.trim(),
+        secondaryEmail: document.getElementById("prof-secondary-email").value.trim(),
+        address: document.getElementById("prof-address").value.trim(),
+        emergencyContact: document.getElementById("prof-emergency").value.trim(),
+        bio: document.getElementById("prof-bio").value.trim(),
+        avatarSeed: document.getElementById("prof-avatar-seed").value
+      };
+
+      saveState();
+      syncProfileDisplays();
+      showToast("Student profile saved to local storage!");
+    }
+
+    // ---------------------------------------------------------
+    // 11. UTILITY & INITIALIZATION
+    // ---------------------------------------------------------
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function renderAll() {
+      updateUnreadBadges();
+      renderDashboard();
+      initScheduleFilters();
+      renderSchedule();
+      renderGrades();
+      renderAnnouncements();
+      loadProfileForm();
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      loadState();
+      renderAll();
+      navigateTo("dashboard");
+    });
+  </script>
+</body>
+</html>
